@@ -2,12 +2,11 @@
 set -e -x
 
 # Install a system package required by our library
-#yum install -y numpy
-pip install Cython
+
 
 # Compile wheels
 for PYBIN in /opt/python/*/bin; do
-    #"${PYBIN}/pip" install -r /io/dev-requirements.txt
+    "${PYBIN}/pip" install -r /io/dev-requirements.txt
     "${PYBIN}/pip" wheel /io/ -w wheelhouse/
 done
 
