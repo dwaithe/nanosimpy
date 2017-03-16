@@ -3,4 +3,4 @@ nose
 Cython
 matplotlib==1.5.3
 scipy
-tifffile
+
