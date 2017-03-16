@@ -16,6 +16,6 @@ setup(name='nanosimpy',
       include_dirs=[numpy.get_include()],
       ext_modules =  cythonize("nanosimpy/*.pyx"),
       install_requires=[
-          'matplotlib', 'scipy', 'tifffile'
+          'matplotlib==1.5.§', 'scipy', 'tifffile'
       ],
       zip_safe=False)
