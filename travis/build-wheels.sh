@@ -4,7 +4,7 @@ set -e -x
 # Install a system package required by our library
 
 for PYBIN in /opt/python/cp26-cp26mu/bin; do
-    "${PYBIN}/pip" install -r numpy==1.10
+    "${PYBIN}/pip" install numpy==1.10
     
 done
 
