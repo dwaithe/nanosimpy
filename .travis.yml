@@ -6,6 +6,8 @@ matrix:
     services:
     - docker
     env: DOCKER_IMAGE=quay.io/pypa/manylinux1_x86_64
+before_install:
+  - sudo apt-get install numpy
 install:
 - docker pull $DOCKER_IMAGE
 script:
