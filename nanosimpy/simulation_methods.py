@@ -1,3 +1,7 @@
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
+
 import numpy as np
 import matplotlib.path as mplPath
 import scipy.spatial as ssp
@@ -25,9 +29,9 @@ def calculate_psf(psfs, distance):
     G = np.exp((-x**2/(2*(FWHM**2)/8.))*(np.log(2)))         # decompose fraction
     G = np.exp((np.log(2.)))**(-x**2/((FWHM**2)/4.0))        # power law decomposition
     G = 2.**(-x**2/(FWHM/2.0)**2)                            # e^(ln2) = 2 indentity.
-    
+
     """
- 
+
     psf = {}
     psf['FWHMs'] = psfs
     psf['pixel_size'] = 1.0;
@@ -41,7 +45,7 @@ def calculate_psf(psfs, distance):
 def integrate_over_psf_adv(psf,track_arr,num_of_mol,psy,psx,steps_to_jump,cc):
     #Pass each molecule through the psf function.
 
-    
+
     psf['trace'] ={}
     sys.stdout.write('\n')
     for ki in range(0, psf['number_FWHMs']):
@@ -55,8 +59,8 @@ def integrate_over_psf_adv(psf,track_arr,num_of_mol,psy,psx,steps_to_jump,cc):
             track_x = track_arr[b][1][to_sample]
             track_y = track_arr[b][0][to_sample]
             trace += psf['V'][ki][np.round(np.sqrt((track_x-psx)**2+(track_y-psy)**2),0).astype(np.int32)]
-        
-        
+
+
         psf['trace'][ki] = copy.deepcopy(trace)
     return psf
 def integrate_over_psf(psf,track_arr,num_of_mol,psy,psx):
@@ -95,7 +99,7 @@ def generate_hop_mesh(L, size, offset):
                 brek = True
         if brek == False and v_x !=[]:
             #Calculate area.
-            
+
             area = 0
             for idx in range(2,v_x.__len__()):
                 ptx_0 = v_x[0]
@@ -104,17 +108,17 @@ def generate_hop_mesh(L, size, offset):
                 pty_1 = v_y[idx-1]
                 ptx_2 = v_x[idx]
                 pty_2 = v_y[idx]
-                
-               
+
+
                 a = np.sqrt((ptx_0-ptx_1)**2+(pty_0-pty_1)**2)
                 b = np.sqrt((ptx_0-ptx_2)**2+(pty_0-pty_2)**2)
                 c = np.sqrt((ptx_2-ptx_1)**2+(pty_2-pty_1)**2)
                 p = (a + b + c)/2.0
-                
-                
+
+
                 area += np.sqrt(p*(p-a)*(p-b)*(p-c))
             area_arr.append(area)
-            
+
             vxmin = int(np.round(np.min(v_x),0))
             vxmax = int(np.round(np.max(v_x),0))
             vymin = int(np.round(np.min(v_y),0))
@@ -129,7 +133,7 @@ def generate_hop_mesh(L, size, offset):
             v_x.append(v_x[0])
             v_y.append(v_y[0])
             vec_mast.append([v_x,v_y])
-    print np.sqrt(np.average(area_arr))
+    print(np.sqrt(np.average(area_arr)))
     #Search the space for repetition.
     #narrow_list
     full_list = []
@@ -137,8 +141,8 @@ def generate_hop_mesh(L, size, offset):
         vec = vec_mast[a]
         for b in range(1,vec[0].__len__()):
             full_list.append([vec[0][b-1],vec[0][b],vec[1][b-1],vec[1][b],0])
-                    
-            
+
+
     narrow_list = []
     dup_arr =[]
     for a in range(0,full_list.__len__()):
@@ -146,30 +150,30 @@ def generate_hop_mesh(L, size, offset):
         duplicate = False
         for b in range(0,narrow_list.__len__()):
             mec = narrow_list[b]
-            
+
             if vec[0] == mec[0] and vec[1] == mec[1] and vec[2] == mec[2] and vec[3] == mec[3]:
                 duplicate = True
                 continue
-                
+
             elif vec[0] == mec[1] and vec[1] == mec[0] and vec[2] == mec[3] and vec[3] == mec[2]:
                 duplicate = True
                 continue
-            
-                
-        if duplicate == False:   
+
+
+        if duplicate == False:
             narrow_list.append(vec)
     y1,x1 = np.where(map_img ==0)
     for x, y in zip(x1,y1):
         if x >100 and x <map_img.shape[1] - 100 and y>100 and y<map_img.shape[0]-100:
-            
+
             med = np.max(map_img[y-5:y+5,x-5:x+5])
-            
+
             if med > 0:
                 map_img[y,x] = med
-            
+
     return map_img, narrow_list, vec_mast, area_arr
 def generate_trapping_zones(size, tzr,actual_number,num_positions_to_try,max_travel):
-        
+
     #Divide this into the area.
     num_in_xy = np.ceil(np.sqrt(actual_number))
 
@@ -195,18 +199,18 @@ def generate_trapping_zones(size, tzr,actual_number,num_positions_to_try,max_tra
     loc_map = np.ones((size,size))*-1
     loc_map[y_in,x_in] = np.arange(0,x_in.shape[0]).astype(np.int32)
 
-    
+
 
     #Our iteration counter.
     cc = 0
-    
+
     num_of_iterations = 500
 
     one_per = int(np.round(num_of_iterations*actual_number*0.01, 0))
     total = float(num_of_iterations)*float(actual_number)
 
     while cc < total:
-        
+
         if (cc % one_per) == 0.0:
                 sys.stdout.write('\r')
                 per = int(np.round(100*float(cc)/float(total),0))
@@ -225,7 +229,7 @@ def generate_trapping_zones(size, tzr,actual_number,num_positions_to_try,max_tra
         xcl = int(np.clip(xc-(tzr*4), 0, size))
         xcu = int(np.clip(xc+(tzr*4), 0, size))
         full_list = np.array(loc_map[ycl:ycu,xcl:xcu])
-        
+
         #Generate a narrow list.
         narrow_list = full_list[full_list>-1]
         #If there are no neighbours within a range.
@@ -236,7 +240,7 @@ def generate_trapping_zones(size, tzr,actual_number,num_positions_to_try,max_tra
                 xco = pos_x[np.random.choice(np.arange(0,8),8,replace=False)]*np.random.choice(np.arange(0,int(max_travel)),1)
                 yco = pos_y[np.random.choice(np.arange(0,8),8,replace=False)]*np.random.choice(np.arange(0,int(max_travel)),1)
                 if x_in[cid] < size-1 and y_in[cid] < size-1 and x_in[cid]>1 and y_in[cid] >1:
-                    
+
                     loc_map[y_in[cid], x_in[cid]] = -1
                     x_in[cid] += yco
                     y_in[cid] += xco
@@ -248,7 +252,7 @@ def generate_trapping_zones(size, tzr,actual_number,num_positions_to_try,max_tra
 
         else:
             #The index cid is global lid
-            b  = cid == narrow_list 
+            b  = cid == narrow_list
             x_in_cl = x_in[narrow_list.astype(np.int32)]
             y_in_cl = y_in[narrow_list.astype(np.int32)]
             #Copy input array.
@@ -256,27 +260,27 @@ def generate_trapping_zones(size, tzr,actual_number,num_positions_to_try,max_tra
             cli_y = list(copy.deepcopy(y_in_cl))
             cli_xa = cli_x.pop(np.where(b)[0])
             cli_ya = cli_y.pop(np.where(b)[0])
-            
-            
+
+
             #Takes the first point that works. Skips if all iterations fail, circle didn't move.
             for tti in range(0,num_positions_to_try):
                 #Random point and random direction.
                 xco = pos_x[np.random.choice(np.arange(0,8),1)]*np.random.choice(np.arange(0,int(max_travel)),1)
-                yco = pos_y[np.random.choice(np.arange(0,8),1)]*np.random.choice(np.arange(0,int(max_travel)),1)          
-                
+                yco = pos_y[np.random.choice(np.arange(0,8),1)]*np.random.choice(np.arange(0,int(max_travel)),1)
+
                 #Try a combination
                 cli_xb = cli_xa + xco
                 cli_yb = cli_ya + yco
-                
+
                 #Make sure is a valid location.
                 if cli_xb < size-1 and cli_yb < size-1 and cli_xb>1 and cli_yb >1:
-                    
+
                     dx = cli_x- cli_xb
                     dy = cli_y- cli_yb
                     dist = np.sqrt((dx)**2+(dy)**2)
                     #Counts the number overlapping.
                     ctc = np.sum(dist < tzr*2)
-                    
+
                     #If valid location.
                     if ctc == 0:
                         #Update the locations map.
@@ -326,7 +330,7 @@ def brownian_stochastic_trap(total_sim_time,time_step,num_of_mol,D_out, D_in, R,
     mode = 'brownian_trap'
     return brownian_advanced_cython(mode,total_sim_time,time_step,num_of_mol,D_out,D_in, map_img,R,offset,phob_in,phob_out,ptrap_off,ptrap_on)
 def brownian_stochastic_trap_hop(total_sim_time,time_step,num_of_mol,D_out, D_in,phob_in,phob_out,map_img, R,offset,ptrap_off,ptrap_on):
-    
+
     mode = 'brownian_trap_hop'
     return brownian_advanced_cython(mode,total_sim_time,time_step,num_of_mol,D_out,D_in, map_img,R,offset,phob_in,phob_out,ptrap_off,ptrap_on)
 def brownian_only(total_sim_time,time_step,num_of_mol,D, R,offset):
@@ -353,12 +357,12 @@ def brownian_only_numpy(total_sim_time,time_step,num_of_mol,D, width, height):
     Outputs:
     track_arr:             A dictionary where each track number (e.g. track_arr[0]) contains the track data [0,:] [1,:]
     """
-   
-    
+
+
     # Number of steps.
     num_of_steps = int(round(float(total_sim_time)/float(time_step),0))
 
-    print 'num_of_steps',num_of_steps
+    print('num_of_steps',num_of_steps)
     # Calculates length scales
     scale_in = np.sqrt(2.0 * (float(D)*1e3) * float(time_step))
 
@@ -367,14 +371,14 @@ def brownian_only_numpy(total_sim_time,time_step,num_of_mol,D, width, height):
     start_coord_y = (np.random.uniform(0.0, 1.0, num_of_mol))*height
 
     track_arr = {}
-    #This can be done as one big matrix, but can crash system if large so 
+    #This can be done as one big matrix, but can crash system if large so
     #I break it up by molecule.
     for b in range(0,num_of_mol):
-        print 'processing tracks: ',(float(b)/float(num_of_mol))*100,'%'
+        print('processing tracks: ',(float(b)/float(num_of_mol))*100,'%')
 
         sys.stdout.write('\r')
         per = int((float(b)/float(num_of_mol))*100)
-        sys.stdout.write("Processing tracks: [%-20s] %d%% complete" % ('='*(per/5), per))
+        sys.stdout.write("Processing tracks: [%-20s] %d%% complete" % ('='*int(per/5), per))
         sys.stdout.flush()
         track = np.zeros((2,num_of_steps))
         track[0,0] = start_coord_y[b]
@@ -387,8 +391,8 @@ def brownian_only_numpy(total_sim_time,time_step,num_of_mol,D, width, height):
         mod[0,:] = np.floor(track[0,:].astype(np.float64)/height)
         mod[1,:] = np.floor(track[1,:].astype(np.float64)/width)
         track_arr[b] = np.array(out-([mod[0,:]*height,mod[1,:]*width]))
-        
-        
+
+
     #We go through and make sure our particles wrap around.
     #for b in range(0,num_of_mol):
     #    print 'wrapping tracks: ',(float(b)/float(num_of_mol))*100,'%'
@@ -429,7 +433,7 @@ def brownian_advanced_cython(mode,total_sim_time,time_step,num_of_mol,D_out,D_in
     # Calculates length scales
     scale_in = np.sqrt(2.0 * (float(D_in)*1e3) * float(time_step))
     scale_out = np.sqrt(2.0 * (float(D_out)*1e3) * float(time_step))
-    
+
 
     #Randomly generates start locations
     t = np.random.uniform(0.0, 2.0*np.pi, num_of_mol)
@@ -458,9 +462,9 @@ def brownian_advanced_cython(mode,total_sim_time,time_step,num_of_mol,D_out,D_in
     if mode == 'brownian_domain_trap':
         #Domain trapping needs its own dedicated function
         bcy.brownian_domain_trap(track_arr,num_of_steps, num_of_mol, id_list,width,map_img,phob_out,phob_in,R,R2,offset,scale_in,scale_out)
-    
+
     if mode =='brownian_trap' or mode == 'brownian' or mode == 'brownian_trap_hop':
         #
-    
+
         btcy.brownian_trap(track_arr,num_of_steps, num_of_mol,id_list,width,map_img,phob_out,phob_in,R,R2,offset,scale_in,scale_out,trap_list,ptrap_off,ptrap_on)
-    return track_arr  
+    return track_arr
